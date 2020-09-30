@@ -1,10 +1,10 @@
 library(shiny)
 library(DT)
 library(rmarkdown)
-library(shinythemes)
+#library(shinythemes)
 
 navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advisory System",
-           theme = shinytheme("sandstone"),
+#           theme = shinytheme("sandstone"),
            tabPanel(icon("home"),
                     fluidRow(
                       column(8, offset = 0, style='position:absolute; top:10%; left:15%',
