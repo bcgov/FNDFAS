@@ -299,6 +299,3 @@ write_super_comment <- function (Lab_type, Crown, B_value, N_K_value, Cr_pos, sa
 
   }
 
-
-
-

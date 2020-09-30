@@ -7,10 +7,7 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
            theme = shinytheme("sandstone"),
            tabPanel(icon("home"),
                     fluidRow(
-                      column(2,
-                             
-                      ),
-                      column(8,
+                      column(8, offset = 0, style='position:absolute; top:10%; left:15%',
                              includeMarkdown("README.md")
                       )
                     )
