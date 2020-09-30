@@ -1,7 +1,7 @@
 library(shiny)
 library(DT)
 library(knitr)
-library(kableExtra)
+
 
 function(input, output) {
 
