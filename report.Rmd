@@ -29,7 +29,7 @@
 * Site index (m): `r input$SI`
 
 
-## Foliar Nutrient Data ("normalized" values in parentheses):
+## Foliar Nutrient Data:
 
 ```{r, echo=FALSE,warning=FALSE}
 suppressWarnings(suppressMessages(library("pander")))   # suppress warnings

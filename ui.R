@@ -1,10 +1,10 @@
 library(shiny)
 library(DT)
 library(rmarkdown)
-#library(shinythemes)
+library(shinythemes)
 
 navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advisory System",
-#           theme = shinytheme("sandstone"),
+           theme = shinytheme("sandstone"),
            tabPanel(icon("home"),
                     fluidRow(
                       column(8, offset = 0, style='position:absolute; top:10%; left:15%',
@@ -50,13 +50,13 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
                                textInput("Open","Opening ID:",NA),
                                textInput("SI","Estimated Site Index:",NA),
                                textInput("Crown","Percent Live Crown:",NA),
-                               textInput("Lat_deg","Latitude:",NA),
-                               textInput("Lat_min","",NA),
-                               textInput("Long_deg","Longitude:",NA),
-                               textInput("Long_min","",NA),
-                               textInput("BEC_zone","BEC:",NA),
-                               textInput("BEC_subz","",NA),
-                               textInput("BEC_site","",NA),
+                               textInput("Lat_deg","Latitude (Deg.):",NA),
+                               textInput("Lat_min","Latitude (Min.):",NA),
+                               textInput("Long_deg","Longitude (Deg.):",NA),
+                               textInput("Long_min","Longitude (Min.)",NA),
+                               textInput("BEC_zone","BEC (zone):",NA),
+                               textInput("BEC_subz","BEC (subzone):",NA),
+                               textInput("BEC_site","BEC (site code):",NA),
                                helpText("Has this stand been fertilized with a nitrogenous fertilizer within the past two years?"),
                                radioButtons("Prev_fert", "",
                                             c("Yes" = "Yes","No" = "No"), select="No")
