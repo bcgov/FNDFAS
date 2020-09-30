@@ -1,0 +1,122 @@
+# LODGEPOLE PINE FOLIAR NUTRIENT DIAGNOSIS
+
+* Query date/time: `r Sys.time()`
+
+#### *Caution!* Please note that this report was made through the proto-version of *LODGEPOLE PINE FOLIAR NUTRIENT DIAGNOSIS*, so the diagnosis and fertilizer prescription might contain errors.
+
+## Diagnosis completed for:
+
+* Name: `r paste(input$FirstName, input$LastName)`
+* Organization: `r input$Org`
+* Address: `r input$Addr_1` `r input$Addr_2` `r input$Addr_3` `r input$Addr_4`
+* Foliar sampling date: `r input$samp_date`
+* Analytical Laboratory: `r input$Lab_type`
+
+
+## Site/Stand Information:
+
+* BEC Subzone: `r paste(input$BEC_zone, input$BEC_subz)`
+* Site series: `r input$BEC_site`
+* Site Location: `r input$SiteID`
+* Sample ID: `r input$SampID`
+* Elevation (m): `r input$Elev`
+* Latitude: `r paste(input$Lat_deg, "°", input$Lat_min, "'")`
+* Longitude: `r paste(input$Long_deg, "°", input$Long_min, "'")`
+* Mapsheet: `r input$Map`
+* Opening: `r input$Open`
+* Stand age (yrs): `r input$Age`
+* Stand origin: `r input$Origin`
+* Site index (m): `r input$SI`
+
+
+## Foliar Nutrient Data ("normalized" values in parentheses):
+
+```{r, echo=FALSE,warning=FALSE}
+suppressWarnings(suppressMessages(library("pander")))   # suppress warnings
+panderOptions('table.continues', '')
+outtb <- output.table()
+colnames (outtb) <- c("Elements", "Measured Values", "Normalized values", "Interpretation")
+rownames(outtb) <- NULL
+pander(outtb, split.table = 100, round=1, style = 'rmarkdown')
+```
+
+
+
+## COMMENTS:
+
+```{r, echo=FALSE,warning=FALSE}
+write_super_comment(Lab_type = input$Lab_type, Crown = input$Crown,
+                                                    B_value = B_norm(), N_K_value = N_norm()/K_norm(),
+                                                    Cr_pos = input$Cr_pos, samp_date = input$samp_date, 
+                                                    Diag_base = input$Diag_base, 
+                                                    Comp_Number = as.numeric(input$Comp_Number),
+                                                    Leaf_age = input$Leaf_age, Pertinent = input$Pertinent)
+```
+
+
+## DIAGNOSIS:
+
+*see "Comments" above for factors that may affect the foliar nutrient diagnosis*
+
+### Nitrogen (N):
+`r concat_comments_nutrients("N", N_norm())`
+
+
+### Phosphorus (P):
+`r concat_comments_nutrients("P", P_norm())`
+
+`r concat_comments_nutrients_ratio("N:P", N_norm()/P_norm(), P_norm() )`
+
+### Potassium (K):
+`r concat_comments_nutrients("K", K_norm())`
+
+`r concat_comments_nutrients_ratio("N:K", N_norm()/K_norm(), K_norm() )`
+
+### Calcium (Ca):
+`r concat_comments_nutrients("Ca", Ca_norm())`
+
+
+### Magnesium (Mg):
+`r concat_comments_nutrients("Mg", Mg_norm())`
+`r concat_comments_nutrients_ratio("N:Mg", N_norm()/Mg_norm(), Mg_norm() )`
+
+### Sulphur (S):
+`r concat_comments_nutrients("S", S_norm())`
+`r concat_comments_nutrients_ratio("N:S", N_norm()/S_norm(), S_norm() )`
+`r concat_comments_sulphate(SO4_norm(), input$Prev_fert)`
+
+### Copper (Cu):
+`r concat_comments_nutrients("Cu", Cu_norm())`
+
+
+### Zinc (Zn):
+`r concat_comments_nutrients("Zn", Zn_norm())`
+
+### Iron (Fe):
+`r concat_comments_nutrients("Fe", Fe_norm())`
+
+### Manganese (Mn):
+`r concat_comments_nutrients("Mn", Mn_norm())`
+
+### Boron (B):
+`r concat_comments_nutrients("B", B_norm())`
+
+
+
+##  FERTILIZER PRESCRIPTION:
+
+```{r, echo=FALSE,warning=FALSE}
+write_super_prescription (Prev_fert = input$Prev_fert, N_value = N_norm(), 
+                                                            Lab_type = input$Lab_type, SO4_value = SO4_norm(),
+                                                            N_S_value = N_norm()/S_norm(), Cu_value = Cu_norm(),
+                                                            Zn_value = Zn_norm(), Fe_value = Fe_norm(), 
+                                                            Mn_value = Mn_norm(), P_value = P_norm(), 
+                                                            N_P_value = N_norm()/P_norm(), K_value = K_norm(),
+                                                            N_K_value = N_norm()/K_norm(), Ca_value = Ca_norm(), 
+                                                            Mg_value = Mg_norm(), N_Mg_value = N_norm()/Mg_norm(),
+                                                            B_value = B_norm())
+
+```
+
+
+
