@@ -56,7 +56,7 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
                                textInput("Long_min","Longitude (Min.)",NA),
                                textInput("BEC_zone","BEC (zone):",NA),
                                textInput("BEC_subz","BEC (subzone):",NA),
-                               textInput("BEC_site","BEC (site code):",NA),
+                               textInput("BEC_site","BEC (site series):",NA),
                                helpText("Has this stand been fertilized with a nitrogenous fertilizer within the past two years?"),
                                radioButtons("Prev_fert", "",
                                             c("Yes" = "Yes","No" = "No"), select="No")
