@@ -44,12 +44,14 @@ Int_type3 <- c("Severely deficient",
                "Probable deficiency",
                "Possible deficiency",
                "Likely not deficient",
-               "No deficiency")  
-Int_type4 <- c("No",
+               "No deficiency")
+
+# note that Int_type4 and 5 have reversed order
+Int_type4 <- c("No deficiency",
                "Possible slight",
                "Slight to moderate",
                "Moderate to severe")
-Int_type5 <- c("No",
+Int_type5 <- c("No deficiency",
                "Slight to moderate",
                "Moderate to severe",
                "Severe")
@@ -97,6 +99,8 @@ Int_type31 <- c("severe",
                "possible",
                "likely no",
                "no")  
+
+# note that Int_type41 and 51 have reversed order
 Int_type41 <- c("no",
                "possible slight",
                "slight to moderate",
@@ -303,98 +307,150 @@ write_super_comment <- function (Lab_type, Crown, B_value, N_K_value, Cr_pos, sa
 # This will also work as the base comments for nutrient ratio (e.g., "N:P") disgnosis.
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
 
-concat_comments_nutrients <- function(element, value){
-  if (is.na(value)) paste("The analysis result for", element, "was not entered.", collapse =" ") else {
-    if (element == "N") {
+concat_comments_nutrients <- function(element, value, fertilization, lab_type){
+  if (is.na(value)) {
+  comment <- paste("The analysis result for", element, "was not entered.", collapse =" ")
+  }  
+  
+  else if (element == "N" & fertilization =="No") {
       comment1 <- switch (diag_code(element, value), 
                           'that will likely negatively affect stand performance.',
                           'that will likely negatively affect stand performance.',
                           'that may negatively affect stand performance.',
                           'level of nutrient condition.')
-      paste("Foliar", element, "concentration indicates", Intp_comments(element, value), element, "deficiency", comment1, collapse =" ")
-    } else  if (element %in% c("P", "K", "Ca", "Mg")& diag_code(element, value)==1) {
+      comment <- paste("Foliar", element, "concentration indicates", Intp_comments(element, value), element, "deficiency", comment1, collapse =" ")
+  }
+  
+  else if (element == "N" & fertilization =="Yes") {
+      comment1 <- switch (diag_code(element, value), 
+                          'deficiency, which is surprising given the recent fertilization of this stand.  Because the uptake of applied N is apparently poor, growth response following fertilization may be relatively small.',
+                          'deficiency, which is surprising given the recent fertilization of this stand.  Because the uptake of applied N is apparently poor, growth response following fertilization may be relatively small.',
+                          'deficiency.',
+                          'deficiency.')
+      comment <- paste("Foliar", element, "concentration indicates", Intp_comments(element, value), element, comment1, collapse =" ")
+  }
+  
+  else if (element %in% c("P", "K", "Ca", "Mg") & fertilization =="No" ) {
       comment_list <- list()  
       comment_list[[1]]  <- "Foliar"
       comment_list[[2]]  <- element
       comment_list[[3]]  <- "concentration indicates"
       comment_list[[4]]  <- Intp_comments(element, value)
       comment_list[[5]]  <- element
-      comment_list[[6]]  <- "deficiency that will likely negatively affect stand performance and/or growth response following N fertilization.  Severe"
-      comment_list[[7]]  <- element
-      comment_list[[8]]  <- "deficiencies are uncommon in the B.C. interior, and growth responses to"
-      comment_list[[9]]  <- element
-      comment_list[[10]]  <- "fertilization are not well documented. Therefore, it is suggested that a tree nutrition specialist be consulted. Deficiency symptoms may, or may not, be visible."
-      paste(unlist(comment_list), collapse =" ")
-    } else  if (element %in% c("P", "K", "Ca", "Mg")& diag_code(element, value)==2) {
-      comment_list <- list()  
-      comment_list[[1]]  <- "Foliar"
-      comment_list[[2]]  <- element
-      comment_list[[3]]  <- "concentration indicates"
-      comment_list[[4]]  <- Intp_comments(element, value)
-      comment_list[[5]]  <- element
-      comment_list[[6]]  <- "deficiency that may negatively affect stand performance and/or growth response following N fertilization. Because growth responses to"
-      comment_list[[7]]  <- element
-      comment_list[[8]]  <- "fertilization are not well documented. Therefore, it is suggested that a tree nutrition specialist be consulted.Deficiency symptoms may, or may not, be visible."
-      paste(unlist(comment_list), collapse =" ")
-    } else  if (element %in% c("P", "K", "Ca", "Mg")& diag_code(element, value)==3) {
-      comment_list <- list()  
-      comment_list[[1]]  <- "Foliar"
-      comment_list[[2]]  <- element
-      comment_list[[3]]  <- "concentration indicates"
-      comment_list[[4]]  <- Intp_comments(element, value)
-      comment_list[[5]]  <- element
-      comment_list[[6]]  <- "deficiency. However, results from research trials in the B.C. interior indicate that"
-      comment_list[[7]]  <- element
-      comment_list[[8]]  <- "status will likely not have a serious negative impact on stand performance and/or growth response following N fertilization."
-      paste(unlist(comment_list), collapse =" ")
-    } else  if (element %in% c("P", "K", "Ca", "Mg")& diag_code(element, value)==4) {
-      comment_list <- list()  
-      comment_list[[1]]  <- "Foliar"
-      comment_list[[2]]  <- element
-      comment_list[[3]]  <- "concentration indicates"
-      comment_list[[4]]  <- Intp_comments(element, value)
-      comment_list[[5]]  <- element
-      comment_list[[6]]  <- "deficiency."
-      paste(unlist(comment_list), collapse =" ")
-    } else if (element == "S") {
+      comment_list[[6]]  <- "deficiency."       # this will be appended depending on conditions
+      if (diag_code(element, value)==1) {
+          comment_list[[6]]  <- "deficiency that will likely negatively affect stand performance and/or growth response following N fertilization.  Severe"
+          comment_list[[7]]  <- element
+          comment_list[[8]]  <- "deficiencies are uncommon in the B.C. interior, and growth responses to"
+          comment_list[[9]]  <- element
+          comment_list[[10]]  <- "fertilization are not well documented. Therefore, it is suggested that a tree nutrition specialist be consulted. Deficiency symptoms may, or may not, be visible. Refer to 'Visual Deficiency Symptoms' for common and noticeable symptoms of"
+          comment_list[[11]]  <- element
+          comment_list[[12]]  <- "deficiency."
+          } 
+      else if  (diag_code(element, value)==2) {
+          comment_list[[6]]  <- "deficiency that may negatively affect stand performance and/or growth response following N fertilization. Because growth responses to"
+          comment_list[[7]]  <- element
+          comment_list[[8]]  <- "fertilization are not well documented. Therefore, it is suggested that a tree nutrition specialist be consulted. Deficiency symptoms may, or may not, be visible. Refer to 'Visual Deficiency Symptoms' for common and noticeable symptoms of"
+          comment_list[[9]]  <- element
+          comment_list[[10]]  <- "deficiency."  
+          }
+      else if  (diag_code(element, value)==3){
+          comment_list[[6]]  <- "deficiency. However, results from research trials in the B.C. interior indicate that"
+          comment_list[[7]]  <- element
+          comment_list[[8]]  <- "status will likely not have a serious negative impact on stand performance and/or growth response following N fertilization."
+          }
+  comment <- paste(unlist(comment_list), collapse =" ")  
+  }
+      
+  else if (element %in% c("P", "K", "Mg") & fertilization =="Yes" ) {
+     comment_list <- list()  
+     comment_list[[1]]  <- "Foliar"
+     comment_list[[2]]  <- element
+     comment_list[[3]]  <- "concentration indicates"
+     comment_list[[4]]  <- Intp_comments(element, value)
+     comment_list[[5]]  <- element
+     comment_list[[6]]  <- "deficiency."       # this will be appended depending on conditions
+     if (diag_code(element, value)==1) {
+          comment_list[[6]]  <- "deficiency, likely induced or exacerbated by N fertilization, that may negatively affect stand performance and/or growth response following N fertilization.  Deficiency symptoms are likely visible.  Refer to 'Visual Deficiency Symptoms' for common and noticeable symptoms of"
+          comment_list[[7]]  <- element
+          comment_list[[8]]  <- "deficiency."
+          } 
+     else if (diag_code(element, value)==2) {
+          comment_list[[6]]  <- "deficiency, likely induced or exacerbated by N fertilization, that may negatively affect stand performance and/or growth response following N fertilization.  Deficiency symptoms may, or may not, be visible.  Refer to 'Visual Deficiency Symptoms'for common and noticeable symptoms of"
+          comment_list[[7]]  <- element
+          comment_list[[8]]  <- "deficiency."
+          }
+     else if  (diag_code(element, value)==3){
+          comment_list[[6]]  <- "deficiency, , likely induced by N fertilization.  However, results from research trials in the B.C. interior indicate that"
+          comment_list[[7]]  <- element
+          comment_list[[8]]  <- "status will likely not have a serious negative impact on stand performance and/or growth response following N fertilization."
+          }
+  comment <- paste(unlist(comment_list), collapse =" ")  
+  }      
+
+  else if (element =="Ca" & fertilization =="Yes" ) {      
+     comment_list <- list()  
+     comment_list[[1]]  <- "Foliar"
+     comment_list[[2]]  <- element
+     comment_list[[3]]  <- "concentration indicates"
+     comment_list[[4]]  <- Intp_comments(element, value)
+     comment_list[[5]]  <- element
+     comment_list[[6]]  <- "deficiency."       # this will be appended depending on conditions
+     if (diag_code(element, value)==1) {
+         comment_list[[6]]  <- "deficiency, likely induced or exacerbated by N fertilization, that may negatively affect stand performance and/or growth response following N fertilization.  Deficiency symptoms are likely visible.  Refer to 'Visual Deficiency Symptoms' for common and noticeable symptoms of"
+         comment_list[[7]]  <- element
+         comment_list[[8]]  <- "deficiency."
+         } 
+     else if (diag_code(element, value)==2) {
+         comment_list[[6]]  <- "deficiency, likely induced or exacerbated by N fertilization, that may negatively affect stand performance and/or growth response following N fertilization."
+         }
+     else if (diag_code(element, value)==3){
+         comment_list[[6]]  <- "deficiency, likely induced by N fertilization.  However, results from research trials in the B.C. interior indicate that Ca status will likely not have a serious negative impact on stand performance and/or growth response following N fertilization."
+         }
+  comment <- paste(unlist(comment_list), collapse =" ")     
+  } 
+  
+  else if (element == "S" & fertilization =="No") {
       comment1 <- switch (diag_code(element, value), 
                           'However, foliar SO4 and N/S ratio have greater diagnostic value than total S.',
                           'However, foliar SO4 and N/S ratio have greater diagnostic value than total S.',
                           'However, foliar SO4 and N/S ratio have greater diagnostic value than total S.',
                           '')
-      paste("Foliar", element, "concentration indicates", Intp_comments(element, value), element, "deficiency.", comment1, collapse =" ")
-    } else if (element == "SO4") {
+  comment <- paste("Foliar", element, "concentration indicates", Intp_comments(element, value), element, 'deficiency.', comment1, collapse =" ")
+  }
+  
+  else if (element == "S" & fertilization =="Yes") {
+      comment1 <- switch (diag_code(element, value), 
+                            'deficiency, likely induced or exacerbated by N fertilization.  However, foliar N/S ratio has greater diagnostic value than total S.',
+                            'deficiency, likely induced or exacerbated by N fertilization.  However, foliar N/S ratio has greater diagnostic value than total S.',
+                            'deficiency, likely induced or exacerbated by N fertilization.  However, foliar N/S ratio has greater diagnostic value than total S.',
+                            'deficiency.')
+  comment <- paste("Foliar", element, "concentration indicates", Intp_comments(element, value), element, comment1, collapse =" ")
+  }      
+      
+      
+  else if (element == "SO4" & fertilization =="No" & lab_type != "Others") {
       comment1 <- switch (diag_code(element, value), 
                           'Results from research trials in the B.C. interior indicate that growth response following N fertilization will be minimal unless S is added to the fertilizer prescription.',
                           'Results from research trials in the B.C. interior indicate that growth response following N fertilization will likely be small unless S is added to the fertilizer prescription.',
                           'Results from research trials in the B.C. interior indicate that growth response following N fertilization may be improved if S is added to the fertilizer prescription.',
-                          '')
-      paste("Foliar", element, "concentration indicates", Intp_comments(element, value), element, "deficiency.", comment1, collapse =" ")    
+                          'Results from research trials in the B.C. interior indicate there is low risk of inducing S deficiency following N fertilization.')
+  comment <- paste("Foliar", element, "concentration indicates", Intp_comments(element, value), element, "deficiency.", comment1, collapse =" ")    
+  }
+  
+  else if (element == "SO4" & fertilization =="No" & lab_type == "Others") {
+    comment1 <- switch (diag_code(element, value), 
+                        'Results from research trials in the B.C. interior indicate that growth response following N fertilization will be minimal unless S is added to the fertilizer prescription.  In the absence of "normalized" foliar S and/or SO4 data, interpretative criteria used for S diagnosis may not apply to analytical methods used by the laboratory to which this foliage sample was submitted.',
+                        'Results from research trials in the B.C. interior indicate that growth response following N fertilization will likely be small unless S is added to the fertilizer prescription.  In the absence of "normalized" foliar S and/or SO4 data, interpretative criteria used for S diagnosis may not apply to analytical methods used by the laboratory to which this foliage sample was submitted.',
+                        'Results from research trials in the B.C. interior indicate that growth response following N fertilization may be improved if S is added to the fertilizer prescription.  In the absence of "normalized" foliar S and/or SO4 data, interpretative criteria used for S diagnosis may not apply to analytical methods used by the laboratory to which this foliage sample was submitted.',
+                        'Results from research trials in the B.C. interior indicate there is low risk of inducing S deficiency following N fertilization.  In the absence of "normalized" foliar S and/or SO4 data, interpretative criteria used for S diagnosis may not apply to analytical methods used by the laboratory to which this foliage sample was submitted.')
+  comment <- paste("Foliar", element, "concentration indicates", Intp_comments(element, value), element, "deficiency.", comment1, collapse =" ")    
+  }
+  else if (element == "SO4" & fertilization == "Yes"){
+  comment <- paste("Foliar", element, "concentration indicates", Intp_comments(element, value), element, "deficiency.", "\n", "Foliar SO4 concentration is not a useful measure of S status in fertilized foliage.")  
+  }  
       
-    } else  if (element %in% c("Cu", "Zn", "Fe", "Mn")& diag_code(element, value)==1) {
-      comment_list <- list()  
-      comment_list[[1]]  <- "Foliar"
-      comment_list[[2]]  <- element
-      comment_list[[3]]  <- "concentration indicates"
-      comment_list[[4]]  <- Intp_comments(element, value)
-      comment_list[[5]]  <- element
-      comment_list[[6]]  <- "deficiency that may negatively affect stand performance and/or growth response following N fertilization. Probable"
-      comment_list[[7]]  <- element
-      comment_list[[8]]  <- "deficiencies are uncommon in the B.C. interior, and growth responses to"
-      comment_list[[9]]  <- "fertilization are not well documented. Therefore, it is suggested that a tree nutrition specialist be consulted. Deficiency symptoms may, or may not, be visible."
-      paste(unlist(comment_list), collapse =" ")
-    } else  if (element %in% c("Cu", "Zn", "Fe", "Mn")& diag_code(element, value)==2) {
-      comment_list <- list()  
-      comment_list[[1]]  <- "Foliar"
-      comment_list[[2]]  <- element
-      comment_list[[3]]  <- "concentration indicates"
-      comment_list[[4]]  <- Intp_comments(element, value)
-      comment_list[[5]]  <- element
-      comment_list[[6]]  <- "deficiency. However, results from research trials in the B.C. interior indicate that"
-      comment_list[[7]]  <- element
-      comment_list[[8]]  <- "status will likely not have a serious negative impact on stand performance and/or growth response following N fertilization."
-      paste(unlist(comment_list), collapse =" ")
-    }  else  if (element %in% c("Cu", "Zn", "Fe", "Mn") & diag_code(element, value)==3) {
+  else if (element %in% c("Cu", "Zn", "Fe", "Mn") & fertilization =="No"){
       comment_list <- list()  
       comment_list[[1]]  <- "Foliar"
       comment_list[[2]]  <- element
@@ -402,46 +458,92 @@ concat_comments_nutrients <- function(element, value){
       comment_list[[4]]  <- Intp_comments(element, value)
       comment_list[[5]]  <- element
       comment_list[[6]]  <- "deficiency." 
-      paste(unlist(comment_list), collapse =" ")
-    } else  if (element == "B" & diag_code(element, value)==1) {
-      comment_list <- list()  
-      comment_list[[1]]  <- "Foliar"
-      comment_list[[2]]  <- element
-      comment_list[[3]]  <- "concentration indicates"
-      comment_list[[4]]  <- Intp_comments(element, value)
-      comment_list[[5]]  <- element
-      comment_list[[6]]  <- "deficiency, likely induced or exacerbated by N fertilization. Results from research trials in the B.C. interior indicate that risk of reduced height increment and/or top dieback is high. Deficiency symptoms are likely visible."
-      paste(unlist(comment_list), collapse =" ")
-    } else  if (element == "B" & diag_code(element, value)==2) {
-      comment_list <- list()  
-      comment_list[[1]]  <- "Foliar"
-      comment_list[[2]]  <- element
-      comment_list[[3]]  <- "concentration indicates"
-      comment_list[[4]]  <- Intp_comments(element, value)
-      comment_list[[5]]  <- element
-      comment_list[[6]]  <- "deficiency, likely induced or exacerbated by N fertilization.  Results from research trials in the B.C. interior indicate a moderate risk of  reduced height increment and/or top dieback. Deficiency symptoms may, or may not, be visible."
-      paste(unlist(comment_list), collapse =" ")
-    } else  if (element == "B" & diag_code(element, value)==3) {
-      comment_list <- list()  
-      comment_list[[1]]  <- "Foliar"
-      comment_list[[2]]  <- element
-      comment_list[[3]]  <- "concentration indicates"
-      comment_list[[4]]  <- Intp_comments(element, value)
-      comment_list[[5]]  <- element
-      comment_list[[6]]  <- "deficiency. Although B status will likely not have a serious negative impact on stand performance or growth response following N fertilization, there may be a small negative impact on height increment."
-      paste(unlist(comment_list), collapse =" ")
-    } else  if (element == "B" & diag_code(element, value)%in%c(4,5)) {
-      comment_list <- list()  
-      comment_list[[1]]  <- "Foliar"
-      comment_list[[2]]  <- element
-      comment_list[[3]]  <- "concentration indicates"
-      comment_list[[4]]  <- Intp_comments(element, value)
-      comment_list[[5]]  <- element
-      comment_list[[6]]  <- "deficiency."
-      paste(unlist(comment_list), collapse =" ")
-    }
+      
+      if (diag_code(element, value)==1) {
+          comment_list[[6]]  <- "deficiency that may negatively affect stand performance and/or growth response following N fertilization. Probable"
+          comment_list[[7]]  <- element
+          comment_list[[8]]  <- "deficiencies are uncommon in the B.C. interior, and growth responses to"
+          comment_list[[9]]  <- "fertilization are not well documented. Therefore, it is suggested that a tree nutrition specialist be consulted. Deficiency symptoms may, or may not, be visible. Refer to 'Visual Deficiency Symptoms' for common and noticeable symptoms of"
+          comment_list[[10]]  <- element
+          comment_list[[11]]  <- "deficiency."  
+          }
+      else if (diag_code(element, value)==2) {
+          comment_list[[6]]  <- "deficiency. However, results from research trials in the B.C. interior indicate that"
+          comment_list[[7]]  <- element
+          comment_list[[8]]  <- "status will likely not have a serious negative impact on stand performance and/or growth response following N fertilization."
+          }
+  comment <- paste(unlist(comment_list), collapse =" ")
   }
+    
+  else if (element %in% c("Cu", "Zn", "Fe", "Mn") & fertilization =="Yes"){
+      comment_list <- list()  
+      comment_list[[1]]  <- "Foliar"
+      comment_list[[2]]  <- element
+      comment_list[[3]]  <- "concentration indicates"
+      comment_list[[4]]  <- Intp_comments(element, value)
+      comment_list[[5]]  <- element
+      comment_list[[6]]  <- "deficiency." 
+        
+      if (diag_code(element, value)==1) {
+          comment_list[[6]]  <- "deficiency that may negatively affect stand performance and/or growth response following N fertilization.  Deficiency symptoms may, or may not, be visible.  Refer to 'Visual Deficiency Symptoms' for common and noticeable symptoms of"
+          comment_list[[7]]  <- element
+          comment_list[[8]]  <- "deficiency."
+          }
+      else if (diag_code(element, value)==2) {
+          comment_list[[6]]  <- "deficiency. However, results from research trials in the B.C. interior indicate that"
+          comment_list[[7]]  <- element
+          comment_list[[8]]  <- "status will likely not have a serious negative impact on stand performance and/or growth response following N fertilization."
+          }
+  comment <- paste(unlist(comment_list), collapse =" ")
+  } 
+
+  else if (element == "B" & fertilization =="No") {
+    comment_list <- list()  
+    comment_list[[1]]  <- "Foliar"
+    comment_list[[2]]  <- element
+    comment_list[[3]]  <- "concentration indicates"
+    comment_list[[4]]  <- Intp_comments(element, value)
+    comment_list[[5]]  <- element
+    comment_list[[6]]  <- "deficiency."
+    
+    if (diag_code(element, value)==1){
+      comment_list[[6]]  <- "deficiency, likely induced or exacerbated by N fertilization. Results from research trials in the B.C. interior indicate that risk of reduced height increment and/or top dieback is high. Deficiency symptoms are likely visible. Refer to 'Visual Deficiency Symptoms' for common and noticeable symptoms of B deficiency."  
+      }
+    else if (diag_code(element, value)==2) {
+      comment_list[[6]]  <- "deficiency, likely induced or exacerbated by N fertilization.  Results from research trials in the B.C. interior indicate a moderate risk of  reduced height increment and/or top dieback. Deficiency symptoms may, or may not, be visible. Refer to 'Visual Deficiency Symptoms' for common and noticeable symptoms of B deficiency."
+      }
+    else if (diag_code(element, value)==3) {
+      comment_list[[6]]  <- "deficiency. Although B status will likely not have a serious negative impact on stand performance or growth response following N fertilization, there may be a small negative impact on height increment."
+      }
+  comment <- paste(unlist(comment_list), collapse =" ")
+  }
+
+  
+  else if (element == "B" & fertilization =="Yes") {
+    comment_list <- list()  
+    comment_list[[1]]  <- "Foliar"
+    comment_list[[2]]  <- element
+    comment_list[[3]]  <- "concentration indicates"
+    comment_list[[4]]  <- Intp_comments(element, value)
+    comment_list[[5]]  <- element
+    comment_list[[6]]  <- "deficiency."
+    
+    if (diag_code(element, value)==1){
+      comment_list[[6]]  <- "deficiency, likely induced or exacerbated by N fertilization. Results from research trials in the B.C. interior indicate that risk of reduced height increment and/or top dieback is high. Deficiency symptoms are likely visible. Refer to 'Visual Deficiency Symptoms' for common and noticeable symptoms of B deficiency."  
+    }
+    else if (diag_code(element, value)==2) {
+      comment_list[[6]]  <- "deficiency, likely induced or exacerbated by N fertilization. Results from research trials in the B.C. interior indicate a moderate risk of reduced height increment and/or top dieback.  Deficiency symptoms may, or may not, be visible. Refer to 'Visual Deficiency Symptoms' for common and noticeable symptoms of B deficiency."
+    }
+    else if (diag_code(element, value)==3) {
+      comment_list[[6]]  <- "deficiency. Although B status will likely not have a serious negative impact on stand performance or growth response following N fertilization, there may be a small negative impact on height increment."
+    }
+  comment <- paste(unlist(comment_list), collapse =" ")
+  }  
+  
+comment
+   
 }
+
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -450,7 +552,7 @@ concat_comments_nutrients <- function(element, value){
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-concat_comments_nutrients_ratio <- function (ratio_element, ratio_value, base_value){
+concat_comments_nutrients_ratio <- function (ratio_element, ratio_value, base_value, SO4_value, fertilization){
   
   base_element <- switch (ratio_element, 
                           "N:P"  = "P",
@@ -460,7 +562,8 @@ concat_comments_nutrients_ratio <- function (ratio_element, ratio_value, base_va
   
   if (is.na(ratio_value)|is.na(base_value)) {
     paste("The analysis results for", ratio_element, "and/or", base_element, "were not entered.", collapse =" ")} else {
-      
+  
+       
       comment_list <- list()  
       comment_list[[1]]  <- "Foliar"
       comment_list[[2]]  <- ratio_element
@@ -469,67 +572,60 @@ concat_comments_nutrients_ratio <- function (ratio_element, ratio_value, base_va
       comment_list[[5]]  <- base_element  
       comment_list[[6]]  <- "deficiency."     # below code replace this and thereafter
       
-      if (base_element %in% c("P", "K", "Mg") & diag_code(ratio_element, ratio_value) == 1 ){
+      if (base_element %in% c("P", "K", "Mg") & diag_code(ratio_element, ratio_value) == 4 ){       # severe
+        if (fertilization == "No"){
         comment_list[[6]]  <- "deficiency that will likely negatively affect stand performance and/or growth response following N fertilization."
+        } else {
+          comment_list[[6]]  <-  "deficiency, likely induced or exacerbated by N fertilization."
+        }
       }
       
-      if (base_element %in% c("P", "K", "Mg") & diag_code(ratio_element, ratio_value) == 2 ){
+      if (base_element %in% c("P", "K", "Mg") & diag_code(ratio_element, ratio_value) == 3 ){       # moderate
+        if (fertilization == "No"){
         comment_list[[6]]  <- "deficiency that may negatively affect stand performance and/or growth response following N fertilization."
+        } else {
+          comment_list[[6]]  <- "deficiency, likely induced or exacerbated by N fertilization."
+        }
       }
+      if (base_element %in% c("P", "K", "Mg") & diag_code(ratio_element, ratio_value) == 2 & fertilization =="Yes" ){       # slightly
+          comment_list[[6]]  <- "deficiency, , likely induced by N fertilization."
+        }
       
-      if (base_element %in% c("P", "K", "Mg") & diag_code(ratio_element, ratio_value) == 4 ){
+      if (base_element %in% c("P", "K", "Mg") & diag_code(ratio_element, ratio_value) == 1 ){       # none
         comment_list[[6]]  <- "deficiency. Results from research trials in the B.C. interior indicate there is low risk of inducing"
         comment_list[[7]]  <- base_element
         comment_list[[8]]  <- "deficiency following N fertilization."
       }
       
-      if (base_element %in% c("P", "K", "Mg") & diag_code(base_element, base_value) == 3 & diag_code(ratio_element, ratio_value)%in%c(3, 4) ){
-        comment_list[[6]]  <- "deficiency. However, results from research trials in the B.C. interior indicate that"
-        comment_list[[7]]  <- base_element
-        comment_list[[8]]  <- "status will likely not have a serious negative impact on stand performance and/or growth response following N fertilization."
+      if (base_element %in% c("P", "K", "Mg") & diag_code(base_element, base_value) == 3 & diag_code(ratio_element, ratio_value)%in%c(1, 2) ){
+        comment_list <- list() 
+        comment_list[[1]]  <- "However, foliar"
+        comment_list[[2]]  <- ratio_element
+        comment_list[[3]]  <-  " of the sample and the results from research trials in the B.C. interior indicate that"
+        comment_list[[4]]  <- base_element
+        comment_list[[5]]  <- "status will likely not have a serious negative impact on stand performance and/or growth response following N fertilization."
       }
       
-      if (ratio_element == c("N:S") ){
-        comment_list[[6]]  <- switch(diag_code(ratio_element, ratio_value),
-                                     "deficiency, likely induced or exacerbated by N fertilization. Results from research trials in the B.C. interior indicate that growth response following N fertilization will likely be relatively small.",
-                                     "deficiency, likely induced or exacerbated by N fertilization. Results from research trials in the B.C. interior indicate that growth response following N fertilization may be relatively small.",
-                                     "deficiency, likely induced by N fertilization.",
-                                     "deficiency, likely induced by N fertilization.")
+      if (ratio_element == "N:S" & diag_code(ratio_element, ratio_value)== 4 ){                    # severe
+        comment_list[[6]]  <- ifelse ( fertilization == "No", "deficiency. Foliar N/S ratios of this magnitude have not been documented for unfertilized lodgepole pine in the B.C. interior.  Foliar N and/or S values may be incorrect or N fertilizer may have recently been applied to this stand.", 
+                                       "deficiency, likely induced or exacerbated by N fertilization.  Results from research trials in the B.C. interior indicate that growth response following N fertilization will likely be relatively small.")
+        
+      } else if (ratio_element == "N:S" & diag_code(ratio_element, ratio_value)== 3 ){            # moderate
+        comment_list[[6]]  <- ifelse ( fertilization == "No", "deficiency. Foliar N/S ratios of this magnitude are extremely rare in unfertilized lodgepole pine in the B.C. interior.  Foliar N and/or S values may be incorrect or N fertilizer may have recently been applied to this stand.",
+                                       "deficiency, likely induced or exacerbated by N fertilization.  Results from research trials in the B.C. interior indicate that growth response following N fertilization may be relatively small.")
+        
+      } else if (ratio_element == "N:S" & diag_code(ratio_element, ratio_value)== 2 ){           # slight
+        comment_list[[6]]  <-  ifelse ( fertilization == "No", "deficiency. Results from research trials in the B.C. interior indicate that growth response following N fertilization will be minimal unless S is added to the fertilizer prescription.",
+                                        "deficiency, likely induced by N fertilization")
+        
+      } else if (ratio_element == "N:S" & diag_code(ratio_element, ratio_value)== 1 & !is.na(SO4_value)){
+        comment_list[[6]]  <-  "deficiency. However, research trials in the B.C. interior indicate S deficiency may be induced by N fertilization and that growth response may be enhanced with the addition of S to the fertilizer prescription."
+      } else if (ratio_element == "N:S" & diag_code(ratio_element, ratio_value)== 1 & is.na(SO4_value)){  
+        comment_list[[6]]  <-  "deficiency. However, foliar SO4 concentration has greater diagnostic value than N/S ratio."
       }
       paste(unlist(comment_list), collapse =" ")  
     }
 }
-
-#-------------------------------------------------------------------------------------------------------------------------------------------------------
-# This is the function specific for sulphate diagnosis.
-#-------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-concat_comments_sulphate <- function (value, fertilization){
-  if (is.na(value)) paste("The analysis result for SO4 was not entered.", collapse =" ") else {
-    
-    comment_list <- list()  
-    comment_list[[1]]  <- "Foliar"
-    comment_list[[2]]  <- "SO4"
-    comment_list[[3]]  <- "concentration indicates"
-    comment_list[[4]]  <- Intp_comments("SO4", value)
-    comment_list[[5]]  <- "S"  
-    
-    if (fertilization == "Yes"){
-      comment_list[[6]]  <- paste("deficiency.", "\n", "Foliar SO4 concentration is not a useful measure of S status in fertilized foliage.  However, in the absence of 'normalized' foliar S and/or SO4 data, interpretative criteria used for S diagnosis may not apply to analytical methods used by the laboratory to which this foliage sample was submitted.")  
-      
-    } else {
-      comment_list[[6]]  <- switch(diag_code("SO4", value),
-                                   "deficiency. Results from research trials in the B.C. interior indicate that growth response following N fertilization will be minimal unless S is added to the fertilizer prescription. In the absence of 'normalized' foliar S and/or SO4 data, interpretative criteria used for S diagnosis may not apply to analytical methods used by the laboratory to which this foliage sample was submitted.",
-                                   "deficiency. Results from research trials in the B.C. interior indicate that growth response following N fertilization will likely be small unless S is added to the fertilizer prescription. In the absence of 'normalized' foliar S and/or SO4 data, interpretative criteria used for S diagnosis may not apply to analytical methods used by the laboratory to which this foliage sample was submitted.",
-                                   "deficiency. Results from research trials in the B.C. interior indicate that growth response following N fertilization may be improved if S is added to the fertilizer prescription. In the absence of 'normalized' foliar S and/or SO4 data, interpretative criteria used for S diagnosis may not apply to analytical methods used by the laboratory to which this foliage sample was submitted.",
-                                   "deficiency. Results from research trials in the B.C. interior indicate there is low risk of inducing S deficiency following N fertilization. In the absence of 'normalized' foliar S and/or SO4 data, interpretative criteria used for S diagnosis may not apply to analytical methods used by the laboratory to which this foliage sample was submitted.")
-    }
-    paste(unlist(comment_list), collapse =" ")  
-    
-  }
-}
-
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -539,7 +635,7 @@ concat_comments_sulphate <- function (value, fertilization){
 prescription_properties<-list()
 
 prescription_properties[["Boron_not_likely"]] <-
-  "In most cases, the addition of B to the fertilizer prescription is likely not needed. However, on sites subject to frequent and prolonged growing season moisture deficits, the inclusion of 2-3 kg B/ha (as granular borate [15% B]) in the fertilizer prescription will eliminate the small risk of N-induced B deficiency."
+ "In most cases, the addition of B to the fertilizer prescription is likely not needed. However, on sites subject to frequent and prolonged growing season moisture deficits, the inclusion of 2-3 kg B/ha (as granular borate [15% B]) in the fertilizer prescription will eliminate the small risk of N-induced B deficiency."
 
 prescription_properties[["Boron_possible"]]<-
   "Foliar diagnosis indicates B deficiency may be induced by N fertilization, especially on coarse-textured soils subject to growing season moisture deficits. The inclusion of 2-3 kg B/ha (as granular borate [15% B]) in the fertilizer prescription may be warranted."
@@ -668,8 +764,9 @@ site_properties[["Percent_Live_Crown_Crown"]]<-
 
 site_properties[["Pertinent_site_stand_information_stem_cankers"]]<-
   
-  "The presence of stem cankers or rusts may prevent reliable diagnosis of stand nutrient status if foliage was collected from affected trees. Refer to <A HREF='http://www.for.gov.bc.ca/hfd/pubs/Docs/En/En52.pdf">"Foliar sampling guidelines and nutrient interpretative criteria for lodgepole pine'</A> for further information."
+  "The presence of stem cankers or rusts may prevent reliable diagnosis of stand nutrient status if foliage was collected from affected trees. Refer to <A HREF='http://www.for.gov.bc.ca/hfd/pubs/Docs/En/En52.pdf'>'Foliar sampling guidelines and nutrient interpretative criteria for lodgepole pine'</A> for further information."
 
+  
 site_properties[["Pertinent_site_stand_information_small_damage"]]<-
   
   "The presence of feeding injuries (i.e., stem de-barking) by red squirrels or other animals may prevent reliable diagnosis of stand nutrient status if foliage was collected from damaged trees. Sharp increases in the abundance and severity of feeding injuries have been documented following fertilization of lodgepole pine in the interior of British Columbia. It is recommended that a forest health specialist be consulted if fertilization of this stand is contemplated. "

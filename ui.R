@@ -1,18 +1,28 @@
 library(shiny)
 library(DT)
 library(rmarkdown)
-#library(shinythemes)
 
-navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advisory System",
-#           theme = shinytheme("sandstone"),
+
+navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advisory System", id = "PL_FERT",
+           theme = "bootstrap.min.css",
            tabPanel(icon("home"),
                     fluidRow(
-                      column(8, offset = 0, style='position:absolute; top:10%; left:15%',
+
+                      column(6, offset = 0, style='position:absolute; top:10%; left:15%',
                              includeMarkdown("README.md")
-                      )
+                      ),
+                      column(5, style='position:absolute; top:10%; right:-5%',
+                             sidebarPanel(
+                               h4("Example Reports"),
+                               actionButton("example1", "Example 1"),
+                               actionButton("example2", "Example 2"),
+                               
+                               h4("Deficiency Symptoms"),
+                               actionButton("Vis_sym", "Visual Symptoms"),
+                             ))
                     )
            ),
-           
+
            tabPanel("Data Input",
                     
                     fluidRow(
@@ -28,7 +38,8 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
                                 ),
                                
                                tags$div(class = "inline",
-                               
+                               helpText("Note: The information will be used only for generating the header of the report.",
+                                        "We will not collect any of your personal information."),          
                                textInput("Org","Organization:", placeholder = "Your orgnaization.."),
                                textInput("FirstName","First Name:", placeholder="Your name.."),
                                textInput("LastName","Last Name:", placeholder="Your last name.."),
@@ -93,14 +104,14 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
                                                        "Ministry of Environment" = "Ministry of Environment",
                                                        "Others" = "Others"),
                                            selected = "Pacific Soil Analysis Inc."),
-                               numericInput("N_cont", "N (%)", NA, min = 0),
-                               numericInput("P_cont", "P (%)", NA, min = 0),
-                               numericInput("K_cont", "K (%)", NA, min = 0),
-                               numericInput("Ca_cont", "Ca (%)", NA, min = 0),
-                               numericInput("Mg_cont", "Mg (%)", NA, min = 0),
-                               numericInput("S_cont", "S (%)", NA, min = 0),
+                               numericInput("N_cont", "N (%)", NA, min = 0, step = 0.01),
+                               numericInput("P_cont", "P (%)", NA, min = 0, step = 0.01),
+                               numericInput("K_cont", "K (%)", NA, min = 0, step = 0.01),
+                               numericInput("Ca_cont", "Ca (%)", NA, min = 0, step = 0.01),
+                               numericInput("Mg_cont", "Mg (%)", NA, min = 0, step = 0.001),
+                               numericInput("S_cont", "S (%)", NA, min = 0, step = 0.01),
                                numericInput("SO4_cont", "SO4 (ppm)", NA, min = 0),
-                               numericInput("B_cont", "B (ppm)", NA, min = 0),
+                               numericInput("B_cont", "B (ppm)", NA, min = 0, step = 0.1),
                                numericInput("Cu_cont", "Cu (ppm)", NA, min = 0),
                                numericInput("Zn_cont", "Zn (ppm)", NA, min = 0),
                                numericInput("Fe_cont", "Fe (ppm)", NA, min = 0),
@@ -114,7 +125,7 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
                         wellPanel(
                           h4(icon("file-alt"), "Export Report"),
                           hr(),
-                          radioButtons("Repform", "Document format:", c("PDF", "HTML", "Word"), inline=TRUE),
+                          radioButtons("Repform", "Document format:", c("PDF", "HTML", "Word")),
                           downloadButton("downloadReport","Create Report")
                         )
                       ),
@@ -128,6 +139,8 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
                          h4(icon("pagelines"), "Foliar Nutrient Data"),
                          DTOutput("OutTb"),
 
+
+                         
                          hr(),
                          h4(icon("sticky-note"), "Comments"),
                          htmlOutput("Comments"),
@@ -177,9 +190,36 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
                          h4(icon("file-prescription"), "FERTILIZER PRESCRIPTION"),
                          htmlOutput("prescription"),
                          hr()
+                      )
+                    )
+                    
+               ),
+
+                tabPanel("Visual Deficiency Symptoms", value= "Visual Symptoms",
+                    fluidRow(
+                      column(6, offset = 0, style='position:absolute; top:10%; left:15%',
+                            includeMarkdown("visual_deficiency.md")
+                      )
+                )
+                ),
+
+                tabPanel("Example #1", value= "Example1",
+                    fluidRow(
+                      column(6, offset = 0, style='position:absolute; top:10%; left:15%',
+                            includeHTML("Example_1.html")
+                     )
+                )
+                ),
+           
+               tabPanel("Example #2", value= "Example2",
+                    fluidRow(
+                      column(6, offset = 0, style='position:absolute; top:10%; left:15%',
+                             includeHTML("Example_2.html")
+                      )
                     )
            )
+            
+)
 
 
-))
                       

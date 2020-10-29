@@ -1,9 +1,13 @@
 library(shiny)
 library(DT)
 library(knitr)
+library(rmarkdown)
 
 
-function(input, output) {
+
+
+
+function(input, output, session) {
 
 N_norm <- reactive(ifelse (input$Lab_type==1, input$N_cont, 0.9584*input$N_cont)  )
 P_norm <- reactive(ifelse (input$Lab_type==1, 0.9492*input$P_cont, input$P_cont)  )
@@ -21,6 +25,17 @@ SampID <- reactive(input$SampID)
 BECID <- reactive(input$BECID)
 SPP <- reactive(input$SPP)
 Age <- reactive(input$Age)
+
+observeEvent(input$example1, {
+  updateNavbarPage(session, "PL_FERT", selected = "Example1")
+     })
+observeEvent(input$example2, {
+  updateNavbarPage(session, "PL_FERT", selected = "Example2")
+})
+observeEvent(input$Vis_sym, {
+  updateNavbarPage(session, "PL_FERT", selected = "Visual Symptoms")
+})
+
 
 output.table <- function (){
   Element = c("N", "P", "K", "Ca", "Mg", "S","SO4", "B", "Cu", "Zn", "Fe", "Mn", "N:S", "N:P", "N:K", "N:Mg")
@@ -54,24 +69,24 @@ output$OutTb <- renderDT({
             ))          
 })
 
-output$diag_N <- renderText(concat_comments_nutrients("N", N_norm()))
-output$diag_P <- renderText(concat_comments_nutrients("P", P_norm()))
-output$diag_K <- renderText(concat_comments_nutrients("K", K_norm()))
-output$diag_Ca <- renderText(concat_comments_nutrients("Ca", Ca_norm()))
-output$diag_Mg <- renderText(concat_comments_nutrients("Mg", Mg_norm()))
-output$diag_S <- renderText(concat_comments_nutrients("S", N_norm()))
-output$diag_Cu <- renderText(concat_comments_nutrients("Cu", Cu_norm()))
-output$diag_Zn <- renderText(concat_comments_nutrients("Zn", Zn_norm()))
-output$diag_Fe <- renderText(concat_comments_nutrients("Fe", Fe_norm()))
-output$diag_Mn <- renderText(concat_comments_nutrients("Mn", Mn_norm()))
-output$diag_B <- renderText(concat_comments_nutrients("B", B_norm()))
+output$diag_N <- renderText(concat_comments_nutrients("N", N_norm(), input$Prev_fert, input$Lab_type))
+output$diag_P <- renderText(concat_comments_nutrients("P", P_norm(), input$Prev_fert, input$Lab_type))
+output$diag_K <- renderText(concat_comments_nutrients("K", K_norm(), input$Prev_fert, input$Lab_type))
+output$diag_Ca <- renderText(concat_comments_nutrients("Ca", Ca_norm(), input$Prev_fert, input$Lab_type))
+output$diag_Mg <- renderText(concat_comments_nutrients("Mg", Mg_norm(), input$Prev_fert, input$Lab_type))
+output$diag_S <- renderText(concat_comments_nutrients("S", S_norm(), input$Prev_fert, input$Lab_type))
+output$diag_Cu <- renderText(concat_comments_nutrients("Cu", Cu_norm(), input$Prev_fert, input$Lab_type))
+output$diag_Zn <- renderText(concat_comments_nutrients("Zn", Zn_norm(), input$Prev_fert, input$Lab_type))
+output$diag_Fe <- renderText(concat_comments_nutrients("Fe", Fe_norm(), input$Prev_fert, input$Lab_type))
+output$diag_Mn <- renderText(concat_comments_nutrients("Mn", Mn_norm(), input$Prev_fert, input$Lab_type))
+output$diag_B <- renderText(concat_comments_nutrients("B", B_norm(), input$Prev_fert, input$Lab_type))
 
-output$diag_SO4 <- renderText(concat_comments_sulphate(SO4_norm(), input$Prev_fert))
+output$diag_SO4 <- renderText(concat_comments_nutrients("SO4", SO4_norm(), input$Prev_fert, input$Lab_type))
 
-output$diag_N_P <- renderText(concat_comments_nutrients_ratio("N:P", N_norm()/P_norm(), P_norm() ))
-output$diag_N_K <- renderText(concat_comments_nutrients_ratio("N:K", N_norm()/K_norm(), K_norm() ))
-output$diag_N_Mg <- renderText(concat_comments_nutrients_ratio("N:Mg", N_norm()/Mg_norm(), Mg_norm() ))
-output$diag_N_S <- renderText(concat_comments_nutrients_ratio("N:S", N_norm()/S_norm(), S_norm() ))
+output$diag_N_P <- renderText(concat_comments_nutrients_ratio("N:P", N_norm()/P_norm(), P_norm(), SO4_norm(), input$Prev_fert))
+output$diag_N_K <- renderText(concat_comments_nutrients_ratio("N:K", N_norm()/K_norm(), K_norm(), SO4_norm(), input$Prev_fert))
+output$diag_N_Mg <- renderText(concat_comments_nutrients_ratio("N:Mg", N_norm()/Mg_norm(), Mg_norm(), SO4_norm(), input$Prev_fert))
+output$diag_N_S <- renderText(concat_comments_nutrients_ratio("N:S", N_norm()/S_norm(), S_norm(), SO4_norm(), input$Prev_fert))
 
 output$prescription <- renderUI(write_super_prescription (Prev_fert = input$Prev_fert, N_value = N_norm(), 
                                                             Lab_type = input$Lab_type, SO4_value = SO4_norm(),
@@ -95,7 +110,7 @@ output$Comments <- renderUI(write_super_comment(Lab_type = input$Lab_type, Crown
 
 output$downloadReport <- downloadHandler(
   filename = function() {
-    paste('Foliar_Nut_Report', sep = '.', switch(
+    paste('Foliar_Nutrient_Report', sep = '.', switch(
       input$Repform, PDF = 'pdf', HTML = 'html', Word = 'docx')
     )
   },
@@ -116,7 +131,6 @@ output$downloadReport <- downloadHandler(
     file.rename(out, file)
   }
 )
-
 
 
 

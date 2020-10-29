@@ -44,5 +44,5 @@ Brockley, R.P. 2001. Scientists develop "expert" system for diagnosing the folia
 
 Thomson, A, R. Brockley, and J. Saini. 2001. Lodgepole pine foliar nutrient diagnosis and fertilizer advisory system. Online. Canadian Forest Service, Pacific Forestry Centre, Victoria.
 
-Thomson, A, R. and Taylor C.M.A. 1990. An expert system for diagnosis and treatment of nutrient deficiencies of Sitka spruce in Great Britain. Artificial Intelligence of Applied Natural Resource Management 4(1): 44-52. 
+Thomson, A, R. and Taylor C.M.A. 1990. An expert system for diagnosis and treatment of nutrient deficiencies of Sitka spruce in Great Britain. AI Applications in Natural Resource Management 4(1): 44-52. 
 
