@@ -78,7 +78,7 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
                                h3("Foliar Sampling Information"),
                                dateInput('samp_date',
                                          label = 'Date: yyyy-mm-dd',
-                                         value = NA ),
+                                         value = date()),
                                radioButtons("Cr_pos", "Crown Position:",
                                             c("Upper" = "Upper","Middle" = "Middle", 
                                               "Lower" = "Lower"), select="Upper"),
