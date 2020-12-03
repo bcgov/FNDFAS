@@ -8,10 +8,10 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
            tabPanel(icon("home"),
                     fluidRow(
 
-                      column(6, offset = 0, style='position:absolute; top:10%; left:15%',
+                      column(6, offset = 0, style='position:absolute; left:15%',
                              includeMarkdown("README.md")
                       ),
-                      column(5, style='position:absolute; top:10%; right:-5%',
+                      column(5, style='position:absolute; right:-5%',
                              sidebarPanel(
                                h4("Example Reports"),
                                actionButton("example1", "Example 1"),
@@ -197,7 +197,7 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
 
                 tabPanel("Visual Deficiency Symptoms", value= "Visual Symptoms",
                     fluidRow(
-                      column(6, offset = 0, style='position:absolute; top:10%; left:15%',
+                      column(6, offset = 0, style='position:absolute; left:15%',
                             includeMarkdown("visual_deficiency.md")
                       )
                 )
@@ -205,7 +205,7 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
 
                 tabPanel("Example #1", value= "Example1",
                     fluidRow(
-                      column(6, offset = 0, style='position:absolute; top:10%; left:15%',
+                      column(6, offset = 0, style='position:absolute; left:15%',
                             includeHTML("Example_1.html")
                      )
                 )
@@ -213,7 +213,7 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
            
                tabPanel("Example #2", value= "Example2",
                     fluidRow(
-                      column(6, offset = 0, style='position:absolute; top:10%; left:15%',
+                      column(6, offset = 0, style='position:absolute; left:15%',
                              includeHTML("Example_2.html")
                       )
                     )
