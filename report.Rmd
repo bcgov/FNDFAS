@@ -1,8 +1,14 @@
-# LODGEPOLE PINE FOLIAR NUTRIENT DIAGNOSIS
+---
+always_allow_html: true
+
+---
+
+
+# FOLIAR NUTRIENT DIAGNOSIS REPORT
 
 * Reporting date/time: `r Sys.time()`
 
-#### *Caution!* Please note that this report was made through the proto-version of *LODGEPOLE PINE FOLIAR NUTRIENT DIAGNOSIS*, so the diagnosis and fertilizer prescription might contain errors.
+#### *Caution!* Please note that this report was made through the proto-version of *FOLIAR NUTRIENT DIAGNOSIS*, so the diagnosis and fertilizer prescription might contain errors.
 
 ## Diagnosis completed for:
 
@@ -16,12 +22,11 @@
 ## Site/Stand Information:
 
 * Sample ID: `r input$SampID`
+* Species: `r input$spp`
 * Site Location: `r input$SiteID`
 * BEC Subzone: `r paste(input$BEC_zone, input$BEC_subz)`
 * Site series: `r input$BEC_site`
 * Elevation (m): `r input$Elev`
-* Latitude: `r paste(input$Lat_deg, "°", input$Lat_min, "'")`
-* Longitude: `r paste(input$Long_deg, "°", input$Long_min, "'")`
 * Mapsheet: `r input$Map`
 * Opening: `r input$Open`
 * Stand age (yrs): `r input$Age`
@@ -29,6 +34,28 @@
 * Site index (m): `r input$SI`
 * Percent Live Crown: `r input$Crown`
 * Recently (past two years) fertilized (Yes/No): `r input$Prev_fert`
+
+```{r out.width='100%', echo=FALSE, warning=FALSE, message=FALSE}
+
+lng <- ifelse(input$Long_deg=="", -123.3666667, as.numeric(input$Long_deg) + as.numeric(input$Long_min)/60)
+lat <- ifelse(input$Lat_deg=="", 48.4166667, as.numeric(input$Lat_deg) + as.numeric(input$Lat_min)/60)
+
+
+samp_loc <- data.frame(lng = lng, lat = lat)
+
+map_borders <- c(bottom  = lat - 0.4, 
+                 top     = lat + 0.4,
+                 left    = lng - 0.6,
+                 right   = lng + 0.6)
+map <- get_stamenmap(map_borders, maptype = "toner-lite")
+ggmap(map) +
+    geom_point(data=samp_loc, mapping = aes(x = lng, y = lat, col = "red", size = 200, alpha = 1),
+show.legend = FALSE) +  xlab("Longitude") + ylab("Latitude") + ggtitle('Sample Location') +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1.3))
+
+
+```
+
 
 ## Foliar Sampling Information:
 
@@ -38,7 +65,7 @@
 `r if(input$Diag_base=="Comp_sam") paste("* Number of trees per composite: ", input$Comp_Number )`
 * Pertinent site/stand information: `r input$Pertinent`
 
-\pagebreak
+
 
 ## Foliar Nutrient Data:
 
@@ -46,7 +73,7 @@
 suppressWarnings(suppressMessages(library("pander")))   # suppress warnings
 panderOptions('table.continues', '')
 outtb <- output.table()
-colnames (outtb) <- c("Elements", "Measured Values", "Normalized values", "Interpretation")
+colnames (outtb) <- c("Elements", "Measured Values", "Normalized Values", "Deviation from Adequate Level", "Interpretation")
 rownames(outtb) <- NULL
 pander(outtb, split.table = 100, round=1, style = 'rmarkdown')
 ```
@@ -56,7 +83,7 @@ pander(outtb, split.table = 100, round=1, style = 'rmarkdown')
 ## COMMENTS:
 
 ```{r, echo=FALSE,warning=FALSE}
-write_super_comment(Lab_type = input$Lab_type, Crown = input$Crown,
+write_super_comment(spp = input$spp, Lab_type = input$Lab_type, Crown = input$Crown,
                                                     B_value = B_norm(), N_K_value = N_norm()/K_norm(),
                                                     Cr_pos = input$Cr_pos, samp_date = input$samp_date, 
                                                     Diag_base = input$Diag_base, 
@@ -70,54 +97,54 @@ write_super_comment(Lab_type = input$Lab_type, Crown = input$Crown,
 *see "Comments" above for factors that may affect the foliar nutrient diagnosis*
 
 ### Nitrogen (N):
-`r concat_comments_nutrients("N", N_norm(), input$Prev_fert, input$Lab_type)`
+`r concat_comments_nutrients(spp = input$spp, "N", N_norm(), input$Prev_fert, input$Lab_type)`
 
 
 ### Phosphorus (P):
-`r concat_comments_nutrients("P", P_norm(), input$Prev_fert, input$Lab_type)`
+`r concat_comments_nutrients(spp = input$spp, "P", P_norm(), input$Prev_fert, input$Lab_type)`
 
-`r concat_comments_nutrients_ratio("N:P", N_norm()/P_norm(), P_norm(), SO4_norm(), input$Prev_fert)`
+`r concat_comments_nutrients_ratio(spp = input$spp, "N:P", N_norm()/P_norm(), P_norm(), SO4_norm(), input$Prev_fert)`
 
 ### Potassium (K):
-`r concat_comments_nutrients("K", K_norm(), input$Prev_fert, input$Lab_type)`
+`r concat_comments_nutrients(spp = input$spp, "K", K_norm(), input$Prev_fert, input$Lab_type)`
 
-`r concat_comments_nutrients_ratio("N:K", N_norm()/K_norm(), K_norm(), SO4_norm(), input$Prev_fert)`
+`r concat_comments_nutrients_ratio(spp = input$spp, "N:K", N_norm()/K_norm(), K_norm(), SO4_norm(), input$Prev_fert)`
 
 ### Calcium (Ca):
-`r concat_comments_nutrients("Ca", Ca_norm(), input$Prev_fert, input$Lab_type)`
+`r concat_comments_nutrients(spp = input$spp, "Ca", Ca_norm(), input$Prev_fert, input$Lab_type)`
 
 
 ### Magnesium (Mg):
-`r concat_comments_nutrients("Mg", Mg_norm(), input$Prev_fert, input$Lab_type)`
-`r concat_comments_nutrients_ratio("N:Mg", N_norm()/Mg_norm(), Mg_norm(), SO4_norm(), input$Prev_fert)`
+`r concat_comments_nutrients(spp = input$spp, "Mg", Mg_norm(), input$Prev_fert, input$Lab_type)`
+`r concat_comments_nutrients_ratio(spp = input$spp, "N:Mg", N_norm()/Mg_norm(), Mg_norm(), SO4_norm(), input$Prev_fert)`
 
 ### Sulphur (S):
-`r concat_comments_nutrients("S", S_norm(), input$Prev_fert, input$Lab_type)`
-`r concat_comments_nutrients_ratio("N:S", N_norm()/S_norm(), S_norm(), SO4_norm(), input$Prev_fert)`
-`r output$diag_SO4 <- renderText(concat_comments_nutrients("SO4", SO4_norm(), input$Prev_fert, input$Lab_type))`
+`r concat_comments_nutrients(spp = input$spp, "S", S_norm(), input$Prev_fert, input$Lab_type)`
+`r concat_comments_nutrients_ratio(spp = input$spp, "N:S", N_norm()/S_norm(), S_norm(), SO4_norm(), input$Prev_fert)`
+`r output$diag_SO4 <- renderText(concat_comments_nutrients(spp = input$spp, "SO4", SO4_norm(), input$Prev_fert, input$Lab_type))`
 
 ### Copper (Cu):
-`r concat_comments_nutrients("Cu", Cu_norm(), input$Prev_fert, input$Lab_type)`
+`r concat_comments_nutrients(spp = input$spp, "Cu", Cu_norm(), input$Prev_fert, input$Lab_type)`
 
 
 ### Zinc (Zn):
-`r concat_comments_nutrients("Zn", Zn_norm(), input$Prev_fert, input$Lab_type)`
+`r concat_comments_nutrients(spp = input$spp, "Zn", Zn_norm(), input$Prev_fert, input$Lab_type)`
 
 ### Iron (Fe):
-`r concat_comments_nutrients("Fe", Fe_norm(), input$Prev_fert, input$Lab_type)`
+`r concat_comments_nutrients(spp = input$spp, "Fe", Fe_norm(), input$Prev_fert, input$Lab_type)`
 
 ### Manganese (Mn):
-`r concat_comments_nutrients("Mn", Mn_norm(), input$Prev_fert, input$Lab_type)`
+`r concat_comments_nutrients(spp = input$spp, "Mn", Mn_norm(), input$Prev_fert, input$Lab_type)`
 
 ### Boron (B):
-`r concat_comments_nutrients("B", B_norm(), input$Prev_fert, input$Lab_type)`
+`r concat_comments_nutrients(spp = input$spp, "B", B_norm(), input$Prev_fert, input$Lab_type)`
 
 
 
 ##  FERTILIZER PRESCRIPTION:
 
 ```{r, echo=FALSE,warning=FALSE}
-write_super_prescription (Prev_fert = input$Prev_fert, N_value = N_norm(), 
+write_super_prescription (spp = input$spp, Prev_fert = input$Prev_fert, N_value = N_norm(), 
                                                             Lab_type = input$Lab_type, SO4_value = SO4_norm(),
                                                             N_S_value = N_norm()/S_norm(), Cu_value = Cu_norm(),
                                                             Zn_value = Zn_norm(), Fe_value = Fe_norm(), 

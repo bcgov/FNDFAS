@@ -2,10 +2,9 @@ library(shiny)
 library(DT)
 library(knitr)
 library(rmarkdown)
-
-
-
-
+library(leaflet)
+library(ggmap)
+library(dplyr)
 
 function(input, output, session) {
 
@@ -37,17 +36,64 @@ observeEvent(input$Vis_sym, {
 })
 
 
+
+
+write_site_info <- function (SampID, samp_date, Lab_type, SiteID, BEC_zone, BEC_subz, BEC_site, Elev, Mapsheet, OpenID, Age, Origin, SI, Crown, Prev_fert){
+  comment_list <- list()
+  comment_list[[1]] <- paste("Sample ID:", SampID)
+  comment_list[[2]] <- paste("Sampling Date:", samp_date)
+  comment_list[[3]] <- paste("Analytical Laboratory:", Lab_type)
+  comment_list[[4]] <- paste("Site ID:", SiteID)
+  comment_list[[5]] <- paste("BEC Zone: ", BEC_zone, BEC_subz, " ", BEC_site, sep = "")
+  comment_list[[6]] <- paste("Elevation:", Elev)
+  comment_list[[7]] <- paste("Mapsheet:", Mapsheet)
+  comment_list[[8]] <- paste("Opening ID:", OpenID)
+  comment_list[[9]] <- paste("Stand Age (yr):", Age)
+  comment_list[[10]] <- paste("Stand Origin: ", switch(Origin, "Plantation" = "Plantation", "Natural_F"="Natural (fire origin)", "Natural_H"= "Natural (harvest origin)"))
+  comment_list[[11]] <- paste("Site Index (m):", SI)
+  comment_list[[12]] <- paste("Percent Live Crown:", Crown)
+  comment_list[[13]] <- paste("Recently (past two years) fertilized (Yes/No):", Prev_fert)
+                             
+  HTML(paste("<li>", unlist(comment_list), collapse ="<br/>"))
+  
+}
+
+
+
+output$Site_Info <- renderUI(write_site_info(SampID = input$SampID, samp_date = input$samp_date, Lab_type = input$Lab_type, 
+                                             SiteID = input$SiteID, BEC_zone = input$BEC_zone, BEC_subz = input$BEC_subz, 
+                                             BEC_site = input$BEC_site, Elev = input$Elev, 
+                                             Mapsheet = input$Map, OpenID = input$Open, Age = input$Age, Origin = input$Origin,
+                                             SI = input$SI, Crown = input$Crown, Prev_fert = input$Prev_fert) )
+
+# Add interactive location map
+
+lng <- reactive(as.numeric(input$Long_deg) + as.numeric(input$Long_min)/60)
+lat <- reactive(as.numeric(input$Lat_deg) + as.numeric(input$Lat_min)/60)
+
+output$Loc_map <- renderLeaflet({
+  leaflet() %>%
+    addTiles() %>%  # Add default OpenStreetMap map tiles
+    setView(lng = ifelse(is.na(lng()), -123.3666667, lng()), 
+            lat = ifelse(is.na(lat()), 48.4166667, lat()), 
+            zoom = ifelse(is.na(lat()), 12, 8)) %>%
+    addMarkers(lng=lng(), 
+               lat=lat(), 
+               popup="The sampling location")
+})
+
+
 output.table <- function (){
-  Element = c("N", "P", "K", "Ca", "Mg", "S","SO4", "B", "Cu", "Zn", "Fe", "Mn", "N:S", "N:P", "N:K", "N:Mg")
+  Element = c("N", "P", "K", "Ca", "Mg", "S", "SO4", "B", "Cu", "Zn", "Fe", "Mn", "N:S", "N:P", "N:K", "N:Mg")
   Raw.value = as.numeric(round(c(input$N_cont, input$P_cont, input$K_cont, input$Ca_cont, input$Mg_cont, input$S_cont, input$SO4_cont, 
                 input$B_cont, input$Cu_cont, input$Zn_cont, input$Fe_cont, input$Mn_cont,
                 input$N_cont/input$S_cont, input$N_cont/input$P_cont, input$N_cont/input$K_cont, input$N_cont/input$Mg_cont), 3))
   Norm.values <- as.numeric(round(c(N_norm(), P_norm(), K_norm(), Ca_norm(), Mg_norm(), S_norm(), SO4_norm(), 
                                 B_norm(), Cu_norm(), Zn_norm(), Fe_norm(), Mn_norm(),  
                                N_norm()/S_norm(), N_norm()/P_norm(), N_norm()/K_norm(), N_norm()/Mg_norm()), 3))
-  
-  Interpretation <- mapply (Interpret, Element, Norm.values)
-  Out_Table <- data.frame (cbind(Element, Raw.value, Norm.values, Interpretation))
+  Dev.suff <- Norm.values - apply(mapply(T_func, input$spp, Element), 2, max, na.rm=TRUE)
+  Interpretation <- mapply (Interpret, input$spp, Element, Norm.values)
+  Out_Table <- data.frame (cbind(Element, Raw.value, Norm.values, Dev.suff, Interpretation))
   Out_Table
 }
 
@@ -57,7 +103,7 @@ output$OutTb <- renderDT({
     class = 'display',
     thead(
       tr(
-        lapply(c("Elements", "Measured Values", "Normalized Values", "Interpretation"), th)
+        lapply(c("Elements", "Measured Values", "Normalized Values", "Deviation from Adequate Level", "Interpretation"), th)
       )  
     )
   )
@@ -69,26 +115,26 @@ output$OutTb <- renderDT({
             ))          
 })
 
-output$diag_N <- renderText(concat_comments_nutrients("N", N_norm(), input$Prev_fert, input$Lab_type))
-output$diag_P <- renderText(concat_comments_nutrients("P", P_norm(), input$Prev_fert, input$Lab_type))
-output$diag_K <- renderText(concat_comments_nutrients("K", K_norm(), input$Prev_fert, input$Lab_type))
-output$diag_Ca <- renderText(concat_comments_nutrients("Ca", Ca_norm(), input$Prev_fert, input$Lab_type))
-output$diag_Mg <- renderText(concat_comments_nutrients("Mg", Mg_norm(), input$Prev_fert, input$Lab_type))
-output$diag_S <- renderText(concat_comments_nutrients("S", S_norm(), input$Prev_fert, input$Lab_type))
-output$diag_Cu <- renderText(concat_comments_nutrients("Cu", Cu_norm(), input$Prev_fert, input$Lab_type))
-output$diag_Zn <- renderText(concat_comments_nutrients("Zn", Zn_norm(), input$Prev_fert, input$Lab_type))
-output$diag_Fe <- renderText(concat_comments_nutrients("Fe", Fe_norm(), input$Prev_fert, input$Lab_type))
-output$diag_Mn <- renderText(concat_comments_nutrients("Mn", Mn_norm(), input$Prev_fert, input$Lab_type))
-output$diag_B <- renderText(concat_comments_nutrients("B", B_norm(), input$Prev_fert, input$Lab_type))
+output$diag_N <- renderText(concat_comments_nutrients(input$spp, "N", N_norm(), input$Prev_fert, input$Lab_type))
+output$diag_P <- renderText(concat_comments_nutrients(input$spp, "P", P_norm(), input$Prev_fert, input$Lab_type))
+output$diag_K <- renderText(concat_comments_nutrients(input$spp, "K", K_norm(), input$Prev_fert, input$Lab_type))
+output$diag_Ca <- renderText(concat_comments_nutrients(input$spp, "Ca", Ca_norm(), input$Prev_fert, input$Lab_type))
+output$diag_Mg <- renderText(concat_comments_nutrients(input$spp, "Mg", Mg_norm(), input$Prev_fert, input$Lab_type))
+output$diag_S <- renderText(concat_comments_nutrients(input$spp, "S", S_norm(), input$Prev_fert, input$Lab_type))
+output$diag_Cu <- renderText(concat_comments_nutrients(input$spp,"Cu", Cu_norm(), input$Prev_fert, input$Lab_type))
+output$diag_Zn <- renderText(concat_comments_nutrients(input$spp,"Zn", Zn_norm(), input$Prev_fert, input$Lab_type))
+output$diag_Fe <- renderText(concat_comments_nutrients(input$spp,"Fe", Fe_norm(), input$Prev_fert, input$Lab_type))
+output$diag_Mn <- renderText(concat_comments_nutrients(input$spp,"Mn", Mn_norm(), input$Prev_fert, input$Lab_type))
+output$diag_B <- renderText(concat_comments_nutrients(input$spp,"B", B_norm(), input$Prev_fert, input$Lab_type))
 
-output$diag_SO4 <- renderText(concat_comments_nutrients("SO4", SO4_norm(), input$Prev_fert, input$Lab_type))
+output$diag_SO4 <- renderText(concat_comments_nutrients(input$spp, "SO4", SO4_norm(), input$Prev_fert, input$Lab_type))
 
-output$diag_N_P <- renderText(concat_comments_nutrients_ratio("N:P", N_norm()/P_norm(), P_norm(), SO4_norm(), input$Prev_fert))
-output$diag_N_K <- renderText(concat_comments_nutrients_ratio("N:K", N_norm()/K_norm(), K_norm(), SO4_norm(), input$Prev_fert))
-output$diag_N_Mg <- renderText(concat_comments_nutrients_ratio("N:Mg", N_norm()/Mg_norm(), Mg_norm(), SO4_norm(), input$Prev_fert))
-output$diag_N_S <- renderText(concat_comments_nutrients_ratio("N:S", N_norm()/S_norm(), S_norm(), SO4_norm(), input$Prev_fert))
+output$diag_N_P <- renderText(concat_comments_nutrients_ratio(input$spp, "N:P", N_norm()/P_norm(), P_norm(), SO4_norm(), input$Prev_fert))
+output$diag_N_K <- renderText(concat_comments_nutrients_ratio(input$spp, "N:K", N_norm()/K_norm(), K_norm(), SO4_norm(), input$Prev_fert))
+output$diag_N_Mg <- renderText(concat_comments_nutrients_ratio(input$spp, "N:Mg", N_norm()/Mg_norm(), Mg_norm(), SO4_norm(), input$Prev_fert))
+output$diag_N_S <- renderText(concat_comments_nutrients_ratio(input$spp, "N:S", N_norm()/S_norm(), S_norm(), SO4_norm(), input$Prev_fert))
 
-output$prescription <- renderUI(write_super_prescription (Prev_fert = input$Prev_fert, N_value = N_norm(), 
+output$prescription <- renderUI(write_super_prescription (spp = input$spp, Prev_fert = input$Prev_fert, N_value = N_norm(), 
                                                             Lab_type = input$Lab_type, SO4_value = SO4_norm(),
                                                             N_S_value = N_norm()/S_norm(), Cu_value = Cu_norm(),
                                                             Zn_value = Zn_norm(), Fe_value = Fe_norm(), 
@@ -99,7 +145,7 @@ output$prescription <- renderUI(write_super_prescription (Prev_fert = input$Prev
                                                             B_value = B_norm())
                                   )
 
-output$Comments <- renderUI(write_super_comment(Lab_type = input$Lab_type, Crown = input$Crown,
+output$Comments <- renderUI(write_super_comment(spp = input$spp, Lab_type = input$Lab_type, Crown = input$Crown,
                                                     B_value = B_norm(), N_K_value = N_norm()/K_norm(),
                                                     Cr_pos = input$Cr_pos, samp_date = input$samp_date, 
                                                     Diag_base = input$Diag_base, 

@@ -1,9 +1,10 @@
 library(shiny)
 library(DT)
 library(rmarkdown)
+library(leaflet)
 
 
-navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advisory System", id = "PL_FERT",
+navbarPage(title = "Foliar Nutrient Diagnosis and Fertilizer Advisory System", id = "PL_FERT",
            theme = "bootstrap.min.css",
            tabPanel(icon("home"),
                     fluidRow(
@@ -104,13 +105,19 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
                                                        "Ministry of Environment" = "Ministry of Environment",
                                                        "Others" = "Others"),
                                            selected = "Pacific Soil Analysis Inc."),
+                               selectInput(inputId="spp",label="Species",
+                                           choices = c("Lodgepole pine" = "Lodgepole pine", 
+                                                       "Interior spruce" = "Interior spruce",
+                                                       "Interior Douglas-fir" = "Interior Douglas-fir"),
+                                           selected = "Lodgepole pine"),
+
                                numericInput("N_cont", "N (%)", NA, min = 0, step = 0.01),
                                numericInput("P_cont", "P (%)", NA, min = 0, step = 0.01),
                                numericInput("K_cont", "K (%)", NA, min = 0, step = 0.01),
                                numericInput("Ca_cont", "Ca (%)", NA, min = 0, step = 0.01),
                                numericInput("Mg_cont", "Mg (%)", NA, min = 0, step = 0.001),
                                numericInput("S_cont", "S (%)", NA, min = 0, step = 0.01),
-                               numericInput("SO4_cont", "SO4 (ppm)", NA, min = 0),
+                               numericInput("SO4_cont", HTML(paste0("SO",tags$sub("4"), " (ppm)")), NA, min = 0),
                                numericInput("B_cont", "B (ppm)", NA, min = 0, step = 0.1),
                                numericInput("Cu_cont", "Cu (ppm)", NA, min = 0),
                                numericInput("Zn_cont", "Zn (ppm)", NA, min = 0),
@@ -130,13 +137,24 @@ navbarPage(title = "Lodgepole Pine Foliar Nutrient Diagnosis and Fertilizer Advi
                         )
                       ),
                       column(6,
-                         h3(icon("tree"), "LODGEPOLE PINE FOLIAR NUTRIENT DIAGNOSIS") ,
+                         h3(icon("tree"), "FOLIAR NUTRIENT DIAGNOSIS REPORT") ,
+
                          hr(),
-                         tags$li("Query date/time: ", Sys.time()),
+                         h4(span("Caution!", style = "color:red"), "Please note that this report was made through the proto-version of the", tags$em("FOLIAR NUTRIENT DIAGNOSIS,"), "so the diagnosis and fertilizer prescription might contain inaccurate information."),
+
+                         
                          hr(),
-                         h4(span("Caution!", style = "color:red"), "Please note that this report was made through the proto-version of the", tags$em("LODGEPOLE PINE FOLIAR NUTRIENT DIAGNOSIS,"), "so the diagnosis and fertilizer prescription might contain inaccurate information."),
+                         h4(icon("info-circle"), "Site infomation"),
+                         htmlOutput("Site_Info"),
+                         
                          hr(),
-                         h4(icon("pagelines"), "Foliar Nutrient Data"),
+                         h4(icon("map-marked-alt"), "Sample Location"),
+                         
+                         leafletOutput("Loc_map", width = "100%", height = 500),
+                         
+                         
+                         hr(),
+                         h4(icon("pagelines"), "Foliar Nutrient Status"),
                          DTOutput("OutTb"),
 
 
