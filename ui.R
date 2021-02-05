@@ -4,15 +4,16 @@ library(rmarkdown)
 library(leaflet)
 
 
-navbarPage(title = "Foliar Nutrient Diagnosis and Fertilizer Advisory System", id = "PL_FERT",
-           theme = "bootstrap.min.css",
+navbarPage(title = "Foliar Nutrient Diagnosis System", id = "FERT",
+           theme = "bcgov.css",
+
            tabPanel(icon("home"),
                     fluidRow(
 
-                      column(6, offset = 0, style='position:absolute; left:15%',
+                      column(6, offset = 0, style='position:relative; left:10%',
                              includeMarkdown("README.md")
                       ),
-                      column(5, style='position:absolute; right:-5%',
+                      column(5, style='position:relative; right:-10%',
                              sidebarPanel(
                                h4("Example Reports"),
                                actionButton("example1", "Example 1"),
@@ -20,9 +21,8 @@ navbarPage(title = "Foliar Nutrient Diagnosis and Fertilizer Advisory System", i
                                
                                h4("Deficiency Symptoms"),
                                actionButton("Vis_sym", "Visual Symptoms"),
-                             ))
-                    )
-           ),
+                             )
+                      ))),
 
            tabPanel("Data Input",
                     
@@ -62,13 +62,13 @@ navbarPage(title = "Foliar Nutrient Diagnosis and Fertilizer Advisory System", i
                                textInput("Open","Opening ID:",NA),
                                textInput("SI","Estimated Site Index:",NA),
                                textInput("Crown","Percent Live Crown:",NA),
+                               textInput("BEC_zone","BEC (zone):",NA),
+                               textInput("BEC_subz","BEC (subzone):",NA),
+                               textInput("BEC_site","BEC (site series):",NA),
                                textInput("Lat_deg","Latitude (Deg.):",NA),
                                textInput("Lat_min","Latitude (Min.):",NA),
                                textInput("Long_deg","Longitude (Deg.):",NA),
                                textInput("Long_min","Longitude (Min.)",NA),
-                               textInput("BEC_zone","BEC (zone):",NA),
-                               textInput("BEC_subz","BEC (subzone):",NA),
-                               textInput("BEC_site","BEC (site series):",NA),
                                helpText("Has this stand been fertilized with a nitrogenous fertilizer within the past two years?"),
                                radioButtons("Prev_fert", "",
                                             c("Yes" = "Yes","No" = "No"), select="No")
@@ -78,7 +78,7 @@ navbarPage(title = "Foliar Nutrient Diagnosis and Fertilizer Advisory System", i
                              wellPanel(
                                h3("Foliar Sampling Information"),
                                dateInput('samp_date',
-                                         label = 'Date: yyyy-mm-dd',
+                                         label = 'Sampling Date: yyyy-mm-dd',
                                          value = date()),
                                radioButtons("Cr_pos", "Crown Position:",
                                             c("Upper" = "Upper","Middle" = "Middle", 
@@ -89,10 +89,10 @@ navbarPage(title = "Foliar Nutrient Diagnosis and Fertilizer Advisory System", i
                                radioButtons("Leaf_age", "Foliar Age",
                                             c("Current year" = "Cur_yr","1-year-old" = "1_yr", 
                                               "Greater than 1-year-old" = "1-yr-more", "Mixed ages" = "Mixed ages"), select="Cur_yr"),
-                               radioButtons("Diag_base", "Diagnosis is based on:",
+                               radioButtons("Diag_base", "Diagnosis is Based on:",
                                             c("Individual Sample" = "Indv_sam","Composite Sample" = "Comp_sam"), select="Indv_sam"),
-                               numericInput("Comp_Number", "Number of trees per composite:", NA),
-                               checkboxGroupInput("Pertinent", "Pertinent site/stand information:",
+                               numericInput("Comp_Number", "Number of Trees per Composite:", NA),
+                               checkboxGroupInput("Pertinent", HTML("Pertinent Site/Stand <br/>Information:"),
                                             c("Very wet or dry soil conditions", "Needle cast of blight", "Stem cankers or rusts", 
                                               "Animal damage to crop trees"))
                              )
@@ -106,10 +106,10 @@ navbarPage(title = "Foliar Nutrient Diagnosis and Fertilizer Advisory System", i
                                                        "Others" = "Others"),
                                            selected = "Pacific Soil Analysis Inc."),
                                selectInput(inputId="spp",label="Species",
-                                           choices = c("Lodgepole pine" = "Lodgepole pine", 
+                                           choices = c("Select Species" = NA,
+                                                       "Lodgepole pine" = "Lodgepole pine", 
                                                        "Interior spruce" = "Interior spruce",
-                                                       "Interior Douglas-fir" = "Interior Douglas-fir"),
-                                           selected = "Lodgepole pine"),
+                                                       "Interior Douglas-fir" = "Interior Douglas-fir")),
 
                                numericInput("N_cont", "N (%)", NA, min = 0, step = 0.01),
                                numericInput("P_cont", "P (%)", NA, min = 0, step = 0.01),
@@ -215,7 +215,7 @@ navbarPage(title = "Foliar Nutrient Diagnosis and Fertilizer Advisory System", i
 
                 tabPanel("Visual Deficiency Symptoms", value= "Visual Symptoms",
                     fluidRow(
-                      column(6, offset = 0, style='position:absolute; left:15%',
+                      column(6, offset = 0, style='position:relative; left:15%',
                             includeMarkdown("visual_deficiency.md")
                       )
                 )
@@ -223,7 +223,7 @@ navbarPage(title = "Foliar Nutrient Diagnosis and Fertilizer Advisory System", i
 
                 tabPanel("Example #1", value= "Example1",
                     fluidRow(
-                      column(6, offset = 0, style='position:absolute; left:15%',
+                      column(6, offset = 0, style='position:relative; left:15%',
                             includeHTML("Example_1.html")
                      )
                 )
@@ -231,11 +231,29 @@ navbarPage(title = "Foliar Nutrient Diagnosis and Fertilizer Advisory System", i
            
                tabPanel("Example #2", value= "Example2",
                     fluidRow(
-                      column(6, offset = 0, style='position:absolute; left:15%',
+                      column(6, offset = 0, style='position:relative; left:15%',
                              includeHTML("Example_2.html")
                       )
                     )
+           ),
+           
+           column(width = 12,
+                  style = "background-color:#003366; border-top:2px solid #fcba19;",
+                  
+                  tags$footer(class="footer",
+                              tags$div(class="container", style="display:flex; justify-content:center; flex-direction:column; text-align:center; height:46px;",
+                                       tags$ul(style="display:flex; flex-direction:row; flex-wrap:wrap; margin:0; list-style:none; align-items:center; height:100%;",
+                                               tags$li(a(href="https://www2.gov.bc.ca/gov/content/home", "Home", style="font-size:1em; font-weight:normal; color:white; padding-left:5px; padding-right:5px; border-right:1px solid #4b5e7e;")),
+                                               tags$li(a(href="https://www2.gov.bc.ca/gov/content/home/disclaimer", "Disclaimer", style="font-size:1em; font-weight:normal; color:white; padding-left:5px; padding-right:5px; border-right:1px solid #4b5e7e;")),
+                                               tags$li(a(href="https://www2.gov.bc.ca/gov/content/home/privacy", "Privacy", style="font-size:1em; font-weight:normal; color:white; padding-left:5px; padding-right:5px; border-right:1px solid #4b5e7e;")),
+                                               tags$li(a(href="https://www2.gov.bc.ca/gov/content/home/accessibility", "Accessibility", style="font-size:1em; font-weight:normal; color:white; padding-left:5px; padding-right:5px; border-right:1px solid #4b5e7e;")),
+                                               tags$li(a(href="https://www2.gov.bc.ca/gov/content/home/copyright", "Copyright", style="font-size:1em; font-weight:normal; color:white; padding-left:5px; padding-right:5px; border-right:1px solid #4b5e7e;")),
+                                               tags$li(a(href="https://www2.gov.bc.ca/StaticWebResources/static/gov3/html/contact-us.html", "Contact", style="font-size:1em; font-weight:normal; color:white; padding-left:5px; padding-right:5px; border-right:1px solid #4b5e7e;"))
+                                       )
+                              )
+                  )
            )
+           
             
 )
 

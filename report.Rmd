@@ -10,7 +10,7 @@ always_allow_html: true
 
 #### *Caution!* Please note that this report was made through the proto-version of *FOLIAR NUTRIENT DIAGNOSIS*, so the diagnosis and fertilizer prescription might contain errors.
 
-## Diagnosis completed for:
+## Diagnosis reported for:
 
 * Name: `r paste(input$FirstName, input$LastName)`
 * Organization: `r input$Org`
@@ -69,13 +69,16 @@ show.legend = FALSE) +  xlab("Longitude") + ylab("Latitude") + ggtitle('Sample L
 
 ## Foliar Nutrient Data:
 
-```{r, echo=FALSE,warning=FALSE}
+```{r, tableMultiline, echo=FALSE,warning=FALSE}
 suppressWarnings(suppressMessages(library("pander")))   # suppress warnings
 panderOptions('table.continues', '')
 outtb <- output.table()
-colnames (outtb) <- c("Elements", "Measured Values", "Normalized Values", "Deviation from Adequate Level", "Interpretation")
 rownames(outtb) <- NULL
-pander(outtb, split.table = 100, round=1, style = 'rmarkdown')
+colnames (outtb) <- c("Elements", "Measured Values", "Normalized Values", "Deviation from Adequate Level", "Interpretation", "Desirable Condition")
+
+pander(outtb, split.table = Inf, round=1, style = 'rmarkdown')
+
+
 ```
 
 

@@ -26,45 +26,41 @@ SPP <- reactive(input$SPP)
 Age <- reactive(input$Age)
 
 observeEvent(input$example1, {
-  updateNavbarPage(session, "PL_FERT", selected = "Example1")
+  updateNavbarPage(session, "FERT", selected = "Example1")
      })
 observeEvent(input$example2, {
-  updateNavbarPage(session, "PL_FERT", selected = "Example2")
+  updateNavbarPage(session, "FERT", selected = "Example2")
 })
 observeEvent(input$Vis_sym, {
-  updateNavbarPage(session, "PL_FERT", selected = "Visual Symptoms")
+  updateNavbarPage(session, "FERT", selected = "Visual Symptoms")
 })
 
 
 
 
-write_site_info <- function (SampID, samp_date, Lab_type, SiteID, BEC_zone, BEC_subz, BEC_site, Elev, Mapsheet, OpenID, Age, Origin, SI, Crown, Prev_fert){
+write_site_info <- function (){
   comment_list <- list()
-  comment_list[[1]] <- paste("Sample ID:", SampID)
-  comment_list[[2]] <- paste("Sampling Date:", samp_date)
-  comment_list[[3]] <- paste("Analytical Laboratory:", Lab_type)
-  comment_list[[4]] <- paste("Site ID:", SiteID)
-  comment_list[[5]] <- paste("BEC Zone: ", BEC_zone, BEC_subz, " ", BEC_site, sep = "")
-  comment_list[[6]] <- paste("Elevation:", Elev)
-  comment_list[[7]] <- paste("Mapsheet:", Mapsheet)
-  comment_list[[8]] <- paste("Opening ID:", OpenID)
-  comment_list[[9]] <- paste("Stand Age (yr):", Age)
-  comment_list[[10]] <- paste("Stand Origin: ", switch(Origin, "Plantation" = "Plantation", "Natural_F"="Natural (fire origin)", "Natural_H"= "Natural (harvest origin)"))
-  comment_list[[11]] <- paste("Site Index (m):", SI)
-  comment_list[[12]] <- paste("Percent Live Crown:", Crown)
-  comment_list[[13]] <- paste("Recently (past two years) fertilized (Yes/No):", Prev_fert)
+  comment_list[[1]] <- paste("Sample ID:", input$SampID)
+  comment_list[[2]] <- paste("Species:", input$spp)
+  comment_list[[3]] <- paste("Sampling Date:", input$samp_date)
+  comment_list[[4]] <- paste("Analytical Laboratory:", input$Lab_type)
+  comment_list[[5]] <- paste("Site ID:", input$SiteID)
+  comment_list[[6]] <- paste("BEC Zone: ", input$BEC_zone, input$BEC_subz, " ", input$BEC_site, sep = "")
+  comment_list[[7]] <- paste("Elevation:", input$Elev)
+  comment_list[[8]] <- paste("Mapsheet:", input$Mapsheet)
+  comment_list[[9]] <- paste("Opening ID:", input$OpenID)
+  comment_list[[10]] <- paste("Stand Age (yr):", input$Age)
+  comment_list[[11]] <- paste("Stand Origin: ", switch(input$Origin, "Plantation" = "Plantation", "Natural_F"="Natural (fire origin)", "Natural_H"= "Natural (harvest origin)"))
+  comment_list[[12]] <- paste("Site Index (m):", input$SI)
+  comment_list[[13]] <- paste("Percent Live Crown:", input$Crown)
+  comment_list[[14]] <- paste("Recently (past two years) fertilized (Yes/No):", input$Prev_fert)
                              
   HTML(paste("<li>", unlist(comment_list), collapse ="<br/>"))
   
 }
 
+output$Site_Info <- renderUI(write_site_info())
 
-
-output$Site_Info <- renderUI(write_site_info(SampID = input$SampID, samp_date = input$samp_date, Lab_type = input$Lab_type, 
-                                             SiteID = input$SiteID, BEC_zone = input$BEC_zone, BEC_subz = input$BEC_subz, 
-                                             BEC_site = input$BEC_site, Elev = input$Elev, 
-                                             Mapsheet = input$Map, OpenID = input$Open, Age = input$Age, Origin = input$Origin,
-                                             SI = input$SI, Crown = input$Crown, Prev_fert = input$Prev_fert) )
 
 # Add interactive location map
 
@@ -91,9 +87,12 @@ output.table <- function (){
   Norm.values <- as.numeric(round(c(N_norm(), P_norm(), K_norm(), Ca_norm(), Mg_norm(), S_norm(), SO4_norm(), 
                                 B_norm(), Cu_norm(), Zn_norm(), Fe_norm(), Mn_norm(),  
                                N_norm()/S_norm(), N_norm()/P_norm(), N_norm()/K_norm(), N_norm()/Mg_norm()), 3))
-  Dev.suff <- Norm.values - apply(mapply(T_func, input$spp, Element), 2, max, na.rm=TRUE)
+  Dev.suff <- rep(NA, 16)
+  Dev.suff[1:12] <- round(Norm.values - apply(mapply(T_func, input$spp, Element), 2, max, na.rm=TRUE), 3)[1:12]
+  Dev.suff[13:16] <- round(Norm.values - apply(mapply(T_func, input$spp, Element), 2, min, na.rm=TRUE), 3)[13:16]
   Interpretation <- mapply (Interpret, input$spp, Element, Norm.values)
-  Out_Table <- data.frame (cbind(Element, Raw.value, Norm.values, Dev.suff, Interpretation))
+  Desirability <- c(rep("High", 12), rep("Low", 4))
+  Out_Table <- data.frame (cbind(Element, Raw.value, Norm.values, Dev.suff, Interpretation, Desirability))
   Out_Table
 }
 
@@ -103,7 +102,7 @@ output$OutTb <- renderDT({
     class = 'display',
     thead(
       tr(
-        lapply(c("Elements", "Measured Values", "Normalized Values", "Deviation from Adequate Level", "Interpretation"), th)
+        lapply(c("Elements", "Measured Values", "Normalized Values", "Deviation from Adequate Level", "Interpretation", "Desirable Condition"), th)
       )  
     )
   )

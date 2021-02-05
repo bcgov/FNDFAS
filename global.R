@@ -187,17 +187,20 @@ write_super_prescription <- function (spp, Prev_fert, N_value, Lab_type, SO4_val
     if (!is.na(N_value) & Interpret(spp, "N", N_value) != "Adequate" ) {
         comment_list[[length(comment_list)+1]] <- prescription_properties$Nitrogen_Fertilization_deficient  
       } 
-    if (Lab_type != "Others"){
+    if (Lab_type != "Others" & !is.na(SO4_value)){
         comment_list[[length(comment_list)+1]] <- switch (Interpret(spp, "SO4", SO4_value),
                             "Severely deficient"= prescription_properties$Sulphate_severe,
                             "Moderately to severely deficient"= prescription_properties$Sulphate_moderate,
                             "Slightly to moderately deficient"= prescription_properties$Sulphate_slight,
                             "Adequate" =prescription_properties$Sulphate_none)
-        
-        comment_list[[length(comment_list)+1]] <- switch ( sum(c(N_S_value > 12, N_S_value > 14)) + 1,
+      }
+    if (Lab_type != "Others" & is.na(SO4_value)){
+        comment_list[[length(comment_list)+1]] <- switch (sum(N_S_value > 13) + 1,
                             prescription_properties$N_S_none1,
-                            prescription_properties$N_S_none2,
-                            prescription_properties$N_S_deficient)
+                            prescription_properties$N_S_none2)
+      }
+    if (Lab_type != "Others" & Interpret(spp, "N:S", N_S_value) != "No deficiency" & !is.na(N_S_value)){
+      comment_list[[length(comment_list)+1]] <- prescription_properties$N_S_deficient
       }
     if (Lab_type == "Others"){
         comment_list[[length(comment_list)+1]] <- prescription_properties$Other_Labs_Sulphur
@@ -259,7 +262,7 @@ write_super_prescription <- function (spp, Prev_fert, N_value, Lab_type, SO4_val
     comment_list[[length(comment_list)+1]] <- "Since the site was fertilized within the last two years, there is no prescription available."
   }
   
-  if (length(comment_list) == 0) comment_list[[1]] <- "There is not enough data for fertilization prescription."
+  if (length(comment_list) == 0) comment_list[[1]] <- "There is not enough data entered for fertilization prescription."
   
   HTML(paste("<li>", unlist(comment_list), collapse ="<br/>"))
 }
