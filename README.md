@@ -1,3 +1,5 @@
+[![Lifecycle:Stable](https://img.shields.io/badge/Lifecycle-Stable-97ca00)](<Redirect-URL>)
+
 # Foliar Nutrient Diagnosis and Fertilizer Advisory System
 
 Developed at the Pacific Forestry Centre of the Canadian Forest Service in collabaration with the B.C. Ministry of Forests, Lands, Natural Resource Operations and Rural Development.
